@@ -1,0 +1,731 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>นักหารยาว</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@500;700&family=Noto+Sans+Thai+Looped:wght@400;600;700&display=swap">
+<style>
+/* Layout: one column of graph-paper boards, like the workbook page; the long-division grid is the hero. */
+:root {
+  --bg: #FFE3EE;
+  --surface: #FFFFFF;
+  --surface2: #FFEEF6;
+  --ink: #2A2890;
+  --ink-soft: #5B54B4;
+  --accent: #EE1F57;
+  --accent-ink: #FFFFFF;
+  --grid: #4F9CF2;
+  --line: #FF9BC3;
+  --ok: #0A9456;
+  --ok-bg: #C6F6DD;
+  --bad: #D00E3C;
+  --bad-bg: #FFD0DB;
+  --star: #FFA800;
+  --c0: #FF3D68;
+  --c1: #FFB400;
+  --c2: #00C2A0;
+  --c3: #8A4DFF;
+  --font-display: 'Mali', 'Noto Sans Thai Looped', 'Sarabun', sans-serif;
+  --font-body: 'Noto Sans Thai Looped', 'Sarabun', 'Tahoma', sans-serif;
+  --cell: 64px;
+}
+/* Bright look on purpose: always light, even when the device is in dark mode. */
+:root { color-scheme: light; }
+@media (max-width: 380px) { :root { --cell: 54px; } }
+
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--c1) 55%, transparent) 0, transparent 38%),
+    radial-gradient(circle at 100% 18%, color-mix(in srgb, var(--c3) 38%, transparent) 0, transparent 40%),
+    radial-gradient(circle at 0% 70%, color-mix(in srgb, var(--c2) 32%, transparent) 0, transparent 38%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.wrap {
+  max-width: 540px;
+  margin: 0 auto;
+  padding-block: 18px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3, p { margin: 0; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; }
+.eyebrow { font-size: 13px; letter-spacing: .06em; color: var(--ink-soft); font-weight: 600; }
+
+/* ---------- Long-division board ---------- */
+.boardwrap { display: flex; justify-content: center; }
+.board {
+  display: grid;
+  grid-template-columns: var(--cell) 22px var(--cell) var(--cell);
+  grid-auto-rows: var(--cell);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(var(--cell) * .56);
+  font-variant-numeric: tabular-nums;
+}
+.cell {
+  display: flex; align-items: center; justify-content: center;
+  outline: 1px dotted var(--grid); outline-offset: -1px;
+  min-width: 0;
+}
+.cell.div { justify-content: flex-end; padding-right: 6px; }
+.cell.br { padding: 0; color: var(--ink); }
+.cell.br svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.cell.top { border-top: 3px solid var(--ink); }
+.cell.rem { border-top: 3px solid var(--ink); border-bottom: 6px double var(--ink); }
+.cell.fill { color: var(--accent); }
+.cell.on { background: color-mix(in srgb, var(--accent) 14%, transparent); outline: 2px dashed var(--accent); outline-offset: -3px; color: var(--ink); }
+.ph { opacity: .35; }
+.cell.num { color: var(--ink); }
+
+/* ---------- Home ---------- */
+.home-head { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; }
+.home-head h1 { font-size: clamp(44px, 13vw, 64px); line-height: 1.15; font-weight: 700; }
+.home-head h1 em { font-style: normal; color: var(--accent); }
+.home-head p.lead { color: var(--ink-soft); max-width: 36ch; }
+.demo { margin-top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 18px 12px 14px; }
+.demo .cap { text-align: center; margin-top: 8px; color: var(--ink-soft); font-size: 14px; }
+.modes { margin-top: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); overflow: hidden; }
+.mode { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; padding: 14px 16px; border-top: 1px solid var(--line); }
+.mode:first-child { border-top: 0; }
+.mode:hover { background: var(--surface2); }
+.mode .t { flex: 1; min-width: 0; }
+.mode .t b { display: block; font-family: var(--font-display); font-size: 18px; }
+.mode .t span { color: var(--ink-soft); font-size: 14px; }
+.mode .best { font-weight: 700; color: var(--star); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mode .go { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; flex: none; }
+.how { margin-top: 24px; }
+.how h2 { font-size: 20px; margin-bottom: 10px; }
+.how ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.how li { display: flex; gap: 12px; align-items: flex-start; }
+.how li i { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--bg); font-style: normal; font-weight: 700; display: grid; place-items: center; font-family: var(--font-display); }
+
+/* ---------- Play ---------- */
+.top { display: flex; align-items: center; gap: 12px; }
+.back { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; font-weight: 600; }
+.prog { flex: 1; min-width: 0; }
+.prog .meta { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; margin-top: 3px; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--c0), var(--c1), var(--c2)); border-radius: 99px; transition: width .4s; }
+.stars-total { color: var(--star); font-weight: 700; }
+.problem { margin-top: 16px; text-align: center; }
+.eq { font-family: var(--font-display); font-weight: 700; font-size: clamp(32px, 9vw, 42px); line-height: 1.3; font-variant-numeric: tabular-nums; }
+.eq .ans { display: inline-block; min-width: 1.3em; min-height: 1.15em; border: 3px solid var(--ink); border-radius: 8px; padding: 0 .3em; vertical-align: middle; font-size: .8em; }
+.eq .ans.got { border-color: var(--ok); color: var(--ok); }
+.story { color: var(--ink-soft); margin-top: 2px; }
+.paper { margin-top: 14px; background: var(--surface); border: 3px solid var(--grid); border-radius: 22px; padding: 18px 10px; box-shadow: 0 6px 0 color-mix(in srgb, var(--grid) 45%, transparent); }
+.demo { border: 3px solid var(--accent) !important; box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 40%, transparent); }
+.modes .mode:nth-child(1) .go { background: var(--c0); }
+.modes .mode:nth-child(2) .go { background: var(--c2); }
+.modes .mode:nth-child(3) .go { background: var(--c3); color: #FFFFFF; }
+.modes .mode:nth-child(1) .go, .modes .mode:nth-child(2) .go { color: #FFFFFF; }
+.plate { border-color: var(--c1) !important; }
+.next { box-shadow: 0 5px 0 color-mix(in srgb, var(--accent) 45%, #000); }
+.prompt { border: 2px solid var(--c1); background: color-mix(in srgb, var(--c1) 18%, var(--surface)); }
+.prompt { margin-top: 14px; background: var(--surface2); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px; font-weight: 600; }
+.fb { min-height: 48px; margin-top: 10px; padding: 8px 14px; border-radius: 12px; font-weight: 600; display: flex; align-items: center; }
+.fb:empty { display: none; }
+.fb.ok { background: var(--ok-bg); color: var(--ok); }
+.fb.bad { background: var(--bad-bg); color: var(--bad); }
+.helpbtn { margin-top: 10px; background: none; border: 1px dashed var(--ink-soft); color: var(--ink-soft); border-radius: 12px; padding: 6px 14px; font-weight: 600; }
+.strip { margin-top: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.chip { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; text-align: center; padding: 4px 2px; font-variant-numeric: tabular-nums; font-size: 15px; }
+.chip.over { opacity: .45; }
+.keys { margin: 16px auto 0; max-width: 340px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.key { min-height: 56px; background: var(--surface); border: 2px solid var(--line); border-bottom-width: 5px; border-radius: 16px; font-family: var(--font-display); font-size: 25px; font-weight: 700; }
+.key:nth-child(4n+1) { border-color: var(--c0); }
+.key:nth-child(4n+2) { border-color: var(--c1); }
+.key:nth-child(4n+3) { border-color: var(--c2); }
+.key:nth-child(4n) { border-color: var(--c3); }
+.key:active { transform: translateY(3px); border-bottom-width: 2px; background: var(--surface2); }
+.key.go { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-size: 18px; }
+.key.del { font-size: 20px; }
+.shake { animation: shake .35s; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+
+.done { margin-top: 14px; background: var(--surface); border: 2px solid var(--ok); border-radius: 22px; padding: 16px; display: grid; gap: 12px; }
+.answer { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
+.answer u { text-decoration: underline; text-decoration-thickness: 3px; margin-right: 6px; }
+.answer b { color: var(--ok); }
+.check { background: var(--surface2); border-radius: 12px; padding: 8px 12px; font-variant-numeric: tabular-nums; }
+.plates { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 8px; }
+.plate { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--line); background: var(--surface2); display: grid; grid-template-columns: repeat(3, 11px); gap: 3px; place-content: center; max-width: 72px; width: 100%; justify-self: center; }
+.leftover { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--ink-soft); font-size: 14px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+.d0 { background: var(--c0); } .d1 { background: var(--c1); } .d2 { background: var(--c2); } .d3 { background: var(--c3); }
+.earned { color: var(--star); font-size: 28px; letter-spacing: .1em; }
+.earned span { display: inline-block; animation: pop .5s both; }
+.earned span:nth-child(2) { animation-delay: .12s; }
+.earned span:nth-child(3) { animation-delay: .24s; }
+.earned .off { color: var(--line); animation: none; }
+@keyframes pop { from { transform: scale(0) rotate(-40deg); } to { transform: scale(1) rotate(0); } }
+.next { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 16px; min-height: 52px; font-family: var(--font-display); font-weight: 700; font-size: 20px; }
+
+/* ---------- Result ---------- */
+.result { text-align: center; }
+.result h2 { font-size: 34px; margin-top: 8px; }
+.big { font-family: var(--font-display); font-weight: 700; font-size: 56px; color: var(--star); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.review { margin: 16px 0; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); text-align: left; overflow: hidden; }
+.review div { display: flex; justify-content: space-between; gap: 10px; padding: 8px 16px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.review div:first-child { border-top: 0; }
+.review .st { color: var(--star); white-space: nowrap; }
+.row2 { display: grid; gap: 10px; }
+.sec { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; min-height: 50px; font-weight: 700; }
+
+.kid { width: 100%; height: auto; display: block; overflow: visible; }
+.kid.happy { animation: hop .7s ease-out 1; }
+.kid.oops { animation: shake .35s; }
+@keyframes hop { 0% { transform: translateY(0); } 40% { transform: translateY(-12px); } 100% { transform: translateY(0); } }
+.cast { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-top: 14px; }
+.cast .kid { width: min(26vw, 110px); flex: none; }
+.bubble { align-self: center; max-width: 130px; text-align: center; background: var(--surface); border: 3px solid var(--c1); border-radius: 18px; padding: 8px 10px; font-family: var(--font-display); font-weight: 700; font-size: 17px; line-height: 1.35; box-shadow: 0 4px 0 color-mix(in srgb, var(--c1) 45%, transparent); }
+.coach { margin-top: 14px; display: flex; align-items: flex-end; gap: 12px; }
+.coach .kidbox { flex: none; width: 76px; }
+.coach .prompt { flex: 1; min-width: 0; margin-top: 0; position: relative; }
+.coach .prompt::before { content: ""; position: absolute; left: -10px; bottom: 22px; border: 8px solid transparent; border-right-color: var(--c1); border-left: 0; }
+.donehead { display: flex; align-items: flex-end; gap: 12px; }
+.donehead .kid { width: 84px; flex: none; }
+.rkids { display: flex; justify-content: center; gap: 8px; }
+.rkids .kid { width: min(34vw, 130px); }
+.credit { margin-top: 28px; text-align: center; font-size: 15px; color: var(--ink-soft); }
+.credit b { font-family: var(--font-display); color: var(--accent); font-size: 17px; }
+
+/* ---------- Framed problem text ---------- */
+.problem { background: var(--surface); border: 3px solid var(--accent); border-radius: 22px; padding: 14px 14px 16px; box-shadow: 0 6px 0 color-mix(in srgb, var(--accent) 40%, transparent); display: grid; gap: 10px; }
+.eq { font-size: clamp(36px, 10vw, 48px); color: var(--ink); }
+.story { margin-top: 0; color: var(--ink); font-size: 18px; font-weight: 700; line-height: 1.5; background: color-mix(in srgb, var(--c1) 22%, var(--surface)); border: 2px dashed var(--c1); border-radius: 14px; padding: 8px 12px; text-wrap: balance; }
+
+/* ---------- Pen layer + toolbar ---------- */
+.paper { position: relative; }
+#ink { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 19px; touch-action: none; cursor: crosshair; }
+.nopen #ink { pointer-events: none; touch-action: auto; cursor: default; }
+.tools { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tbtn { background: var(--surface); border: 2px solid var(--line); border-radius: 12px; padding: 4px 12px; font-weight: 600; min-height: 40px; }
+.tbtn[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.sw { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--surface); box-shadow: 0 0 0 2px var(--line); padding: 0; }
+.sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+.sw0 { background: var(--ink); } .sw1 { background: var(--c0); } .sw2 { background: var(--c2); } .sw3 { background: var(--c3); }
+.tools .sp { flex: 1; }
+/* ---------- Computer screens: two columns so each screen fits on one page ---------- */
+.result { max-width: 540px; margin: 0 auto; }
+@media (prefers-reduced-motion: reduce) {
+  .shake, .earned span, .kid.happy, .kid.oops { animation: none; }
+  .bar i { transition: none; }
+}
+</style>
+
+<div class="wrap">
+
+  <section id="home">
+    <div class="col">
+    <div class="home-head">
+      <span class="eyebrow">คณิตศาสตร์ ป.3 · บทที่ 8 การหาร</span>
+      <h1>นักหาร<em>ยาว</em></h1>
+      <p class="lead">แบ่งขนมให้เท่ากันทุกจาน แล้วดูว่าเหลือเศษกี่ชิ้น ทำทีละขั้นบนกระดาษตาราง</p>
+    </div>
+    <div class="cast" id="cast"></div>
+    <div class="demo">
+      <div class="boardwrap" id="demoBoard"></div>
+      <p class="cap">19 ÷ 2 ได้ 9 เศษ 1</p>
+    </div>
+    </div>
+    <div class="col">
+    <div class="modes" id="modes"></div>
+    <div class="how">
+      <h2>ทำกี่ขั้น</h2>
+      <ol>
+        <li><i>1</i><span>หาว่าตัวหารคูณอะไร ได้ใกล้ตัวตั้งที่สุดแต่ไม่เกิน แล้วเขียนผลหารไว้บนวงเล็บ</span></li>
+        <li><i>2</i><span>เอาตัวหารคูณผลหาร เขียนผลคูณไว้ใต้ตัวตั้ง</span></li>
+        <li><i>3</i><span>ลบ ตัวตั้งลบผลคูณ ที่เหลือคือเศษ เศษต้องน้อยกว่าตัวหาร</span></li>
+      </ol>
+    </div>
+    </div>
+  </section>
+
+  <section id="play" hidden>
+    <div class="top">
+      <button class="back" id="backBtn" type="button">ออก</button>
+      <button class="back" id="soundBtn" type="button" aria-pressed="true">เสียง เปิด</button>
+      <div class="prog">
+        <div class="meta"><span id="pcount"></span><span class="stars-total" id="pstars"></span></div>
+        <div class="bar"><i id="pbar"></i></div>
+      </div>
+    </div>
+    <div class="col">
+    <div class="problem">
+      <div class="eq" id="eq"></div>
+      <p class="story" id="story"></p>
+    </div>
+    <div class="tools" role="toolbar" aria-label="เครื่องมือเขียน">
+      <button class="tbtn" id="penBtn" type="button" aria-pressed="true">ปากกา</button>
+      <button class="sw sw0" type="button" data-c="--ink" aria-pressed="true" aria-label="สีน้ำเงิน"></button>
+      <button class="sw sw1" type="button" data-c="--c0" aria-pressed="false" aria-label="สีแดง"></button>
+      <button class="sw sw2" type="button" data-c="--c2" aria-pressed="false" aria-label="สีเขียว"></button>
+      <button class="sw sw3" type="button" data-c="--c3" aria-pressed="false" aria-label="สีม่วง"></button>
+      <button class="tbtn" id="erBtn" type="button" aria-pressed="false">ยางลบ</button>
+      <button class="tbtn" id="clrBtn" type="button">ล้างทั้งหมด</button>
+    </div>
+    <div class="paper" id="paper"><div class="boardwrap" id="board"></div><canvas id="ink" aria-label="พื้นที่เขียนด้วยปากกา"></canvas></div>
+    </div>
+    <div class="col">
+    <div class="coach" id="coach"><div class="kidbox" id="kidBox"></div><div class="prompt" id="prompt"></div></div>
+    <div class="fb" id="fb" role="status" aria-live="polite"></div>
+    <div id="inputArea">
+      <button class="helpbtn" id="helpBtn" type="button"></button>
+      <div class="strip" id="strip" hidden></div>
+      <div class="keys" id="keys"></div>
+    </div>
+    <div class="done" id="done" hidden></div>
+    </div>
+  </section>
+
+  <section id="result" class="result" hidden>
+    <div class="rkids" id="rkid"></div>
+    <span class="eyebrow" id="rname"></span>
+    <h2 id="rmsg"></h2>
+    <div class="big" id="rscore"></div>
+    <div class="review" id="review"></div>
+    <div class="row2">
+      <button class="next" id="again" type="button">เล่นชุดนี้อีกครั้ง</button>
+      <button class="sec" id="toHome" type="button">เลือกชุดอื่น</button>
+    </div>
+  </section>
+
+  <p class="credit">สื่อการสอนโดย <b>ครูจองซ่า</b></p>
+
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  var SETS = {
+    s1: { name: 'ชุดที่ 1', sub: 'ฝึกหัด 8 ข้อ ตัวตั้งสองหลัก', items: [[19,2],[26,3],[63,8],[53,7],[35,6],[21,5],[71,9],[39,4]] },
+    s2: { name: 'ชุดที่ 2', sub: 'ลองเอง 8 ข้อ ตัวตั้งสองหลัก', items: [[15,2],[16,3],[25,4],[29,5],[38,6],[30,7],[35,8],[28,9]] },
+    mix: { name: 'ท้าทายรวม', sub: '16 ข้อ สลับลำดับทุกครั้ง', items: [] }
+  };
+  SETS.mix.items = SETS.s1.items.concat(SETS.s2.items);
+
+  var KEY = 'nak-harn-best';
+  var best = {};
+  try { best = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { best = {}; }
+  function saveBest() { try { localStorage.setItem(KEY, JSON.stringify(best)); } catch (e) {} }
+
+  var cur = null;
+
+  function shuffle(a) {
+    a = a.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+  function show(id) {
+    ['home', 'play', 'result'].forEach(function (s) { $(s).hidden = s !== id; });
+    window.scrollTo(0, 0);
+  }
+
+  /* ----- board ----- */
+  function pad2(s) {
+    s = String(s);
+    while (s.length < 2) s = ' ' + s;
+    return [s[0].trim(), s[1].trim()];
+  }
+  function board(N, d, step, buf) {
+    var q = Math.floor(N / d), prod = d * q, rem = N - prod;
+    var qTxt = step === 0 ? buf : (step > 0 ? String(q) : '');
+    var pTxt = step > 1 ? String(prod) : (step === 1 ? buf : '');
+    var rTxt = step >= 3 ? String(rem) : (step === 2 ? buf : '');
+    var pp = pad2(pTxt), rr = pad2(rTxt);
+    var tens = Math.floor(N / 10), ones = N % 10;
+
+    function cell(cls, txt, active, filled, ph) {
+      var c = 'cell ' + cls + (active ? ' on' : '') + (filled && !active ? ' fill' : '');
+      var inner = txt;
+      if (active && ph && txt === '') inner = '<span class="ph">?</span>';
+      return '<div class="' + c + '">' + inner + '</div>';
+    }
+    var bracket = '<div class="cell br"><svg viewBox="0 0 22 ' + 64 + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<path d="M0 1.5H22" stroke="currentColor" stroke-width="3" fill="none" vector-effect="non-scaling-stroke"/>' +
+      '<path d="M3 1.5Q19 32 3 62" stroke="currentColor" stroke-width="3" fill="none" vector-effect="non-scaling-stroke" stroke-linecap="round"/></svg></div>';
+
+    var h = '';
+    h += cell('', '', false) + cell('', '', false) + cell('', '', false) + cell('', qTxt, step === 0, step > 0, true);
+    h += '<div class="cell div num">' + d + '</div>' + bracket +
+         '<div class="cell top num">' + tens + '</div><div class="cell top num">' + ones + '</div>';
+    h += cell('', '', false) + cell('', '', false) + cell('', pp[0], step === 1, step > 1) + cell('', pp[1], step === 1, step > 1, true);
+    h += cell('', '', false) + cell('', '', false) + cell('rem', rr[0], step === 2, step > 2) + cell('rem', rr[1], step === 2, step > 2, true);
+    return '<div class="board" role="img" aria-label="กระดาษตารางหารยาว ' + N + ' หาร ' + d + '">' + h + '</div>';
+  }
+
+  /* ----- cartoon students (original SVG drawings) ----- */
+  function kid(kind, mood) {
+    var boy = kind === 'boy', skin = '#FFD2A8', hair = boy ? '#3A2748' : '#5A2D3E', ink = '#2A2890';
+    var s = '<svg class="kid ' + mood + '" viewBox="0 0 120 142" role="img" aria-label="ตัวการ์ตูนนักเรียน">';
+    if (!boy) s += '<circle cx="20" cy="66" r="12" fill="' + hair + '"/><circle cx="100" cy="66" r="12" fill="' + hair + '"/>';
+    s += '<rect x="42" y="118" width="12" height="14" rx="5" fill="' + skin + '"/><rect x="66" y="118" width="12" height="14" rx="5" fill="' + skin + '"/>';
+    s += '<ellipse cx="46" cy="135" rx="10" ry="5" fill="' + ink + '"/><ellipse cx="74" cy="135" rx="10" ry="5" fill="' + ink + '"/>';
+    s += boy ? '<rect x="36" y="104" width="48" height="18" rx="7" fill="' + ink + '"/>'
+             : '<path d="M34 104 L86 104 L96 127 L24 127Z" fill="' + ink + '"/>';
+    s += '<rect x="34" y="76" width="52" height="38" rx="14" fill="#fff" stroke="#CFC8F2" stroke-width="2"/>';
+    s += '<path d="M46 78 L74 78 L60 101Z" fill="' + (boy ? '#EE1F57' : '#FFB400') + '"/>';
+    var up = mood === 'happy';
+    var la = up ? 'M38 84 L20 60' : 'M38 88 L30 112', ra = up ? 'M82 84 L100 60' : 'M82 88 L90 112';
+    var lh = up ? [18, 55] : [29, 118], rh = up ? [102, 55] : [91, 118];
+    [la, ra].forEach(function (p) {
+      s += '<path d="' + p + '" stroke="#CFC8F2" stroke-width="15" stroke-linecap="round" fill="none"/>' +
+           '<path d="' + p + '" stroke="#fff" stroke-width="11" stroke-linecap="round" fill="none"/>';
+    });
+    s += '<circle cx="' + lh[0] + '" cy="' + lh[1] + '" r="7" fill="' + skin + '"/><circle cx="' + rh[0] + '" cy="' + rh[1] + '" r="7" fill="' + skin + '"/>';
+    s += '<circle cx="29" cy="58" r="6" fill="' + skin + '"/><circle cx="91" cy="58" r="6" fill="' + skin + '"/>';
+    s += '<circle cx="60" cy="54" r="31" fill="' + skin + '"/>';
+    if (boy) {
+      s += '<path d="M29 52 Q27 18 60 19 Q93 18 91 52 Q84 36 62 38 Q42 36 29 52Z" fill="' + hair + '"/><path d="M52 20 Q58 7 69 18Z" fill="' + hair + '"/>';
+    } else {
+      s += '<path d="M29 54 Q27 18 60 19 Q93 18 91 54 Q80 32 60 40 Q42 32 29 54Z" fill="' + hair + '"/>' +
+           '<circle cx="25" cy="56" r="6" fill="#FFB400"/><circle cx="95" cy="56" r="6" fill="#8A4DFF"/>';
+    }
+    s += '<circle cx="40" cy="68" r="6" fill="#FF9BC3" opacity=".6"/><circle cx="80" cy="68" r="6" fill="#FF9BC3" opacity=".6"/>';
+    if (mood === 'happy') {
+      s += '<path d="M43 60 Q48 53 53 60" stroke="' + ink + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>' +
+           '<path d="M67 60 Q72 53 77 60" stroke="' + ink + '" stroke-width="3.5" fill="none" stroke-linecap="round"/>' +
+           '<path d="M50 69 Q60 84 70 69Z" fill="#C8344A"/><ellipse cx="60" cy="76" rx="5" ry="3" fill="#FF8FA8"/>';
+    } else if (mood === 'oops') {
+      s += '<ellipse cx="48" cy="59" rx="4.5" ry="6" fill="' + ink + '"/><ellipse cx="72" cy="59" rx="4.5" ry="6" fill="' + ink + '"/>' +
+           '<circle cx="49.5" cy="56.5" r="1.8" fill="#fff"/><circle cx="73.5" cy="56.5" r="1.8" fill="#fff"/>' +
+           '<path d="M41 48 L54 52 M79 48 L66 52" stroke="' + hair + '" stroke-width="3" stroke-linecap="round"/>' +
+           '<ellipse cx="60" cy="74" rx="5" ry="4" fill="#C8344A"/>' +
+           '<path d="M98 36 Q104 46 98 51 Q92 46 98 36Z" fill="#6EC6FF"/>';
+    } else {
+      s += '<ellipse cx="48" cy="59" rx="4" ry="5" fill="' + ink + '"/><ellipse cx="72" cy="59" rx="4" ry="5" fill="' + ink + '"/>' +
+           '<circle cx="49.5" cy="57" r="1.6" fill="#fff"/><circle cx="73.5" cy="57" r="1.6" fill="#fff"/>' +
+           '<path d="M52 72 Q60 79 68 72" stroke="' + ink + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    }
+    return s + '</svg>';
+  }
+
+  /* ----- home ----- */
+  function renderHome() {
+    $('demoBoard').innerHTML = board(19, 2, 3, '');
+    $('cast').innerHTML = kid('boy', 'happy') + '<div class="bubble">มาหารยาวด้วยกันนะ</div>' + kid('girl', 'happy');
+    var h = '';
+    Object.keys(SETS).forEach(function (k) {
+      var s = SETS[k];
+      var max = s.items.length * 3;
+      h += '<button class="mode" type="button" data-mode="' + k + '">' +
+        '<span class="t"><b>' + s.name + '</b><span>' + s.sub + '</span></span>' +
+        '<span class="best">★ ' + (best[k] || 0) + '/' + max + '</span>' +
+        '<span class="go" aria-hidden="true">›</span></button>';
+    });
+    $('modes').innerHTML = h;
+    Array.prototype.forEach.call($('modes').querySelectorAll('.mode'), function (b) {
+      b.addEventListener('click', function () { start(b.getAttribute('data-mode')); });
+    });
+    show('home');
+  }
+
+  /* ----- play ----- */
+  function start(mode) {
+    var items = SETS[mode].items;
+    if (mode === 'mix') items = shuffle(items);
+    cur = { mode: mode, items: items, i: 0, step: 0, buf: '', mistakes: 0, strip: false, results: [] };
+    $('fb').textContent = ''; $('fb').className = 'fb';
+    show('play');
+    renderPlay();
+    sizeInk();
+    clearInk();
+    sfx('tap');
+  }
+  function totalStars() { return cur.results.reduce(function (a, r) { return a + r.stars; }, 0); }
+
+  function dots(n, offset) {
+    var s = '';
+    for (var i = 0; i < n; i++) s += '<span class="dot d' + ((i + offset) % 4) + '"></span>';
+    return s;
+  }
+  function renderPlay() {
+    var it = cur.items[cur.i], N = it[0], d = it[1];
+    var q = Math.floor(N / d), prod = d * q, r = N - prod;
+    var done = cur.step >= 3;
+
+    $('pcount').textContent = 'ข้อ ' + (cur.i + 1) + '/' + cur.items.length;
+    $('pbar').style.width = (cur.i / cur.items.length * 100) + '%';
+    $('pstars').textContent = '★ ' + totalStars();
+    $('eq').innerHTML = N + ' ÷ ' + d + ' = <span class="ans' + (done ? ' got' : '') + '">' + (done ? q + ' เศษ ' + r : '') + '</span>';
+    $('story').textContent = 'มีขนม ' + N + ' ชิ้น แบ่งใส่ ' + d + ' จาน จานละเท่า ๆ กัน';
+    $('board').innerHTML = board(N, d, cur.step, cur.buf);
+
+    var prompts = [
+      'ขั้นที่ 1 · ' + d + ' คูณอะไร ได้ใกล้ ' + N + ' ที่สุดแต่ไม่เกิน ' + N + ' เขียนผลหารไว้บนวงเล็บ',
+      'ขั้นที่ 2 · ' + d + ' × ' + q + ' = ? เขียนไว้ใต้ ' + N,
+      'ขั้นที่ 3 · ' + N + ' − ' + prod + ' = ? ที่เหลือคือเศษ'
+    ];
+    $('coach').hidden = done;
+    if (!done) {
+      $('prompt').textContent = prompts[cur.step];
+      $('kidBox').innerHTML = kid(cur.i % 2 ? 'girl' : 'boy', cur.mood || 'neutral');
+    }
+    $('inputArea').hidden = done;
+    $('done').hidden = !done;
+
+    if (!done) {
+      $('helpBtn').textContent = cur.strip ? 'ซ่อนสูตรคูณแม่ ' + d : 'ช่วยหน่อย ดูสูตรคูณแม่ ' + d;
+      $('strip').hidden = !cur.strip;
+      var s = '';
+      for (var k = 1; k <= 9; k++) {
+        s += '<span class="chip' + (d * k > N ? ' over' : '') + '">' + d + ' × ' + k + ' = <b>' + d * k + '</b></span>';
+      }
+      $('strip').innerHTML = s;
+    } else {
+      var last = cur.i + 1 >= cur.items.length;
+      var st = cur.results[cur.results.length - 1].stars;
+      var starHtml = '';
+      for (var n = 1; n <= 3; n++) starHtml += '<span class="' + (n <= st ? '' : 'off') + '">★</span>';
+      var plates = '';
+      for (var p = 0; p < d; p++) plates += '<div class="plate" aria-hidden="true">' + dots(q, 0) + '</div>';
+      $('done').innerHTML =
+        '<div class="donehead">' + kid(cur.i % 2 ? 'girl' : 'boy', 'happy') +
+        '<p class="answer"><u>ตอบ</u>' + N + ' ÷ ' + d + ' ได้ <b>' + q + ' เศษ ' + r + '</b></p></div>' +
+        '<p class="check">ตรวจคำตอบ: ' + d + ' × ' + q + ' + ' + r + ' = ' + prod + ' + ' + r + ' = ' + N + '</p>' +
+        '<div class="plates">' + plates + '</div>' +
+        '<div class="leftover"><span>แบ่งใส่ ' + d + ' จาน จานละ ' + q + ' ชิ้น เหลือเศษ ' + r + ' ชิ้น</span>' + dots(r, 0) + '</div>' +
+        '<div class="earned" aria-label="ได้ ' + st + ' ดาว">' + starHtml + '</div>' +
+        '<button class="next" id="nextBtn" type="button">' + (last ? 'ดูคะแนน' : 'ข้อต่อไป') + '</button>';
+      $('nextBtn').addEventListener('click', next);
+      $('nextBtn').focus({ preventScroll: true });
+    }
+  }
+  function fb(msg, kind) { var e = $('fb'); e.textContent = msg; e.className = 'fb ' + kind; }
+
+  function press(k) {
+    if (!cur || cur.step >= 3) return;
+    sfx('key');
+    var max = cur.step === 0 ? 1 : 2;
+    if (k === 'del') { cur.buf = cur.buf.slice(0, -1); }
+    else if (cur.buf.length < max) { cur.buf += k; }
+    else if (max === 1) { cur.buf = k; }
+    renderBoardOnly();
+  }
+  function renderBoardOnly() {
+    var it = cur.items[cur.i];
+    $('board').innerHTML = board(it[0], it[1], cur.step, cur.buf);
+  }
+
+  function submit() {
+    if (!cur || cur.step >= 3) return;
+    if (cur.buf === '') { fb('กดตัวเลขก่อน แล้วค่อยกด “ตรวจ”', 'bad'); return; }
+    var it = cur.items[cur.i], N = it[0], d = it[1];
+    var q = Math.floor(N / d), prod = d * q, r = N - prod;
+    var v = parseInt(cur.buf, 10), ok = false, msg = '', good = '';
+    if (cur.step === 0) {
+      ok = v === q;
+      good = 'ถูกต้อง ผลหารคือ ' + q;
+      if (!ok) {
+        if (v * d > N) msg = d + ' × ' + v + ' = ' + (d * v) + ' มากกว่า ' + N + ' ไปแล้ว ลองน้อยลง';
+        else msg = d + ' × ' + v + ' = ' + (d * v) + ' เหลือ ' + (N - d * v) + ' ซึ่งยังแบ่งได้อีก ลองมากขึ้น';
+      }
+    } else if (cur.step === 1) {
+      ok = v === prod;
+      good = 'ถูก ' + d + ' × ' + q + ' = ' + prod;
+      if (!ok) msg = 'ลองคิด ' + d + ' × ' + q + ' อีกครั้ง ดูสูตรคูณแม่ ' + d + ' ได้';
+    } else {
+      ok = v === r;
+      good = 'เก่งมาก เศษคือ ' + r;
+      if (!ok) msg = 'ลองลบอีกครั้ง ' + N + ' − ' + prod;
+    }
+    if (ok) {
+      cur.step++; cur.buf = ''; cur.mood = 'happy';
+      fb(good, 'ok');
+      sfx(cur.step === 3 ? 'win' : 'ok');
+      if (cur.step === 3) {
+        var stars = cur.mistakes === 0 ? 3 : (cur.mistakes === 1 ? 2 : 1);
+        cur.results.push({ N: N, d: d, q: q, r: r, stars: stars });
+      }
+      renderPlay();
+    } else {
+      cur.mistakes++; cur.buf = ''; cur.mood = 'oops';
+      if (cur.step === 0) cur.strip = true;
+      fb(msg, 'bad');
+      sfx('bad');
+      renderPlay();
+      var b = $('board'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+    }
+  }
+
+  function next() {
+    if (cur.i + 1 < cur.items.length) {
+      cur.i++; cur.step = 0; cur.buf = ''; cur.mistakes = 0; cur.strip = false; cur.mood = 'neutral';
+      clearInk();
+      $('fb').textContent = ''; $('fb').className = 'fb';
+      renderPlay();
+      window.scrollTo(0, 0);
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    var total = totalStars(), max = cur.items.length * 3, ratio = total / max;
+    if (!best[cur.mode] || total > best[cur.mode]) { best[cur.mode] = total; saveBest(); }
+    $('rname').textContent = SETS[cur.mode].name;
+    $('rkid').innerHTML = kid('boy', ratio >= 0.6 ? 'happy' : 'neutral') + kid('girl', ratio >= 0.6 ? 'happy' : 'neutral');
+    $('rmsg').textContent = ratio >= 0.9 ? 'เก่งมาก หารยาวได้คล่องแล้ว' : (ratio >= 0.6 ? 'ทำได้ดี ลองอีกรอบให้ได้ดาวเต็ม' : 'ไม่เป็นไร ท่องสูตรคูณแล้วลองใหม่นะ');
+    $('rscore').textContent = '★ ' + total + '/' + max;
+    $('review').innerHTML = cur.results.map(function (x) {
+      var s = '';
+      for (var n = 1; n <= 3; n++) s += n <= x.stars ? '★' : '☆';
+      return '<div><span>' + x.N + ' ÷ ' + x.d + ' = ' + x.q + ' เศษ ' + x.r + '</span><span class="st">' + s + '</span></div>';
+    }).join('');
+    show('result');
+    sfx(ratio >= 0.6 ? 'fan' : 'ok');
+  }
+
+  /* ----- sound (synthesized, no audio files) ----- */
+  var snd = { on: true, ctx: null };
+  try { if (localStorage.getItem('nak-harn-snd') === '0') snd.on = false; } catch (e) {}
+  function ac() {
+    if (!snd.ctx) {
+      var C = window.AudioContext || window.webkitAudioContext;
+      if (!C) return null;
+      try { snd.ctx = new C(); } catch (e) { return null; }
+    }
+    if (snd.ctx.state === 'suspended') { try { snd.ctx.resume(); } catch (e) {} }
+    return snd.ctx;
+  }
+  function tone(f, t0, dur, type, vol) {
+    var c = ac(); if (!c) return;
+    var o = c.createOscillator(), g = c.createGain(), t = c.currentTime + t0;
+    o.type = type || 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.15, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
+  function sfx(n) {
+    if (!snd.on) return;
+    try {
+      if (n === 'key') tone(700, 0, 0.05, 'triangle', 0.08);
+      else if (n === 'tap') tone(900, 0, 0.04, 'triangle', 0.06);
+      else if (n === 'ok') { tone(784, 0, 0.12, 'sine', 0.18); tone(1047, 0.1, 0.22, 'sine', 0.18); }
+      else if (n === 'bad') { tone(180, 0, 0.28, 'sawtooth', 0.1); tone(140, 0.12, 0.3, 'sawtooth', 0.09); }
+      else if (n === 'win') { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, i * 0.1, 0.28, 'triangle', 0.18); }); }
+      else if (n === 'fan') { [523, 659, 784, 659, 784, 1047, 1319].forEach(function (f, i) { tone(f, i * 0.12, 0.3, 'triangle', 0.18); }); }
+    } catch (e) {}
+  }
+  function syncSound() {
+    $('soundBtn').textContent = snd.on ? 'เสียง เปิด' : 'เสียง ปิด';
+    $('soundBtn').setAttribute('aria-pressed', snd.on ? 'true' : 'false');
+  }
+  $('soundBtn').addEventListener('click', function () {
+    snd.on = !snd.on;
+    try { localStorage.setItem('nak-harn-snd', snd.on ? '1' : '0'); } catch (e) {}
+    syncSound();
+    sfx('ok');
+  });
+  syncSound();
+
+  /* ----- pen layer ----- */
+  var ink = { tool: 'pen', color: '--ink', on: true, strokes: [], cur: null, penSeen: false };
+  var cv = $('ink'), cx = cv.getContext('2d');
+  function drawStroke(s) {
+    if (!s.pts.length) return;
+    cx.save();
+    cx.lineCap = 'round'; cx.lineJoin = 'round'; cx.lineWidth = s.w;
+    if (s.erase) { cx.globalCompositeOperation = 'destination-out'; cx.strokeStyle = '#000'; }
+    else { cx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue(s.color).trim() || '#2A2890'; }
+    cx.beginPath();
+    cx.moveTo(s.pts[0][0], s.pts[0][1]);
+    if (s.pts.length === 1) cx.lineTo(s.pts[0][0] + 0.01, s.pts[0][1]);
+    for (var i = 1; i < s.pts.length; i++) cx.lineTo(s.pts[i][0], s.pts[i][1]);
+    cx.stroke();
+    cx.restore();
+  }
+  function redrawInk() {
+    cx.save(); cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height); cx.restore();
+    ink.strokes.forEach(drawStroke);
+  }
+  function sizeInk() {
+    var r = $('paper').getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    if (!r.width || !r.height) return;
+    cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    redrawInk();
+  }
+  function clearInk() { ink.strokes = []; ink.cur = null; redrawInk(); }
+  function pt(e) { var r = cv.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  cv.addEventListener('pointerdown', function (e) {
+    if (!ink.on) return;
+    if (e.pointerType === 'pen') ink.penSeen = true;
+    if (e.pointerType === 'touch' && ink.penSeen) return;
+    e.preventDefault();
+    try { cv.setPointerCapture(e.pointerId); } catch (x) {}
+    ink.cur = { color: ink.color, erase: ink.tool === 'eraser', w: ink.tool === 'eraser' ? 26 : 4, pts: [pt(e)] };
+    ink.strokes.push(ink.cur);
+    redrawInk();
+  });
+  cv.addEventListener('pointermove', function (e) {
+    if (!ink.cur) return;
+    ink.cur.pts.push(pt(e));
+    redrawInk();
+  });
+  function endStroke() { ink.cur = null; }
+  cv.addEventListener('pointerup', endStroke);
+  cv.addEventListener('pointercancel', endStroke);
+  function syncTools() {
+    $('paper').classList.toggle('nopen', !ink.on);
+    $('penBtn').setAttribute('aria-pressed', ink.on ? 'true' : 'false');
+    $('penBtn').textContent = ink.on ? 'ปากกา เปิด' : 'ปากกา ปิด';
+    $('erBtn').setAttribute('aria-pressed', ink.on && ink.tool === 'eraser' ? 'true' : 'false');
+    Array.prototype.forEach.call(document.querySelectorAll('.sw'), function (b) {
+      b.setAttribute('aria-pressed', ink.on && ink.tool === 'pen' && b.getAttribute('data-c') === ink.color ? 'true' : 'false');
+    });
+  }
+  $('penBtn').addEventListener('click', function () { ink.on = !ink.on; sfx('tap'); syncTools(); });
+  $('erBtn').addEventListener('click', function () { ink.on = true; ink.tool = 'eraser'; sfx('tap'); syncTools(); });
+  $('clrBtn').addEventListener('click', function () { clearInk(); sfx('tap'); });
+  Array.prototype.forEach.call(document.querySelectorAll('.sw'), function (b) {
+    b.addEventListener('click', function () { ink.on = true; ink.tool = 'pen'; ink.color = b.getAttribute('data-c'); sfx('tap'); syncTools(); });
+  });
+  syncTools();
+  if (window.ResizeObserver) new ResizeObserver(sizeInk).observe($('paper'));
+  window.addEventListener('resize', sizeInk);
+
+  /* ----- keypad + events ----- */
+  (function buildKeys() {
+    var h = '';
+    for (var n = 1; n <= 9; n++) h += '<button class="key" type="button" data-k="' + n + '">' + n + '</button>';
+    h += '<button class="key del" type="button" data-k="del" aria-label="ลบตัวเลข">⌫</button>';
+    h += '<button class="key" type="button" data-k="0">0</button>';
+    h += '<button class="key go" type="button" data-k="go">ตรวจ</button>';
+    $('keys').innerHTML = h;
+    $('keys').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      var k = b.getAttribute('data-k');
+      if (k === 'go') submit(); else press(k);
+    });
+  })();
+  $('helpBtn').addEventListener('click', function () { cur.strip = !cur.strip; renderPlay(); });
+  $('backBtn').addEventListener('click', renderHome);
+  $('toHome').addEventListener('click', renderHome);
+  $('again').addEventListener('click', function () { start(cur.mode); });
+  document.addEventListener('keydown', function (e) {
+    if ($('play').hidden || !cur || cur.step >= 3) return;
+    if (e.key >= '0' && e.key <= '9') press(e.key);
+    else if (e.key === 'Backspace') press('del');
+    else if (e.key === 'Enter') submit();
+  });
+
+  renderHome();
+})();
+</script>
+
+</body></html>
